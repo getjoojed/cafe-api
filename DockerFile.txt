@@ -1,0 +1,3 @@
+FROM adoptopenjdk:11-jre-hotspot
+COPY target/cafe.jar cafe.jar
+ENTRYPOINT ["java", "-jar", "/cafe.jar"]
