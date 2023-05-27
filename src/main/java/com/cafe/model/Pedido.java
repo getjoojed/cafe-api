@@ -17,6 +17,8 @@ public class Pedido {
 	
 	@ManyToMany
 	private List<Produto> produtos = new ArrayList<>();
+	
+	private boolean fechado = false;
 
 	public Long getId() {
 		return id;
@@ -26,6 +28,14 @@ public class Pedido {
 		this.id = id;
 	}
 	
+	public boolean isFechado() {
+		return fechado;
+	}
+
+	public void setFechado(boolean fechado) {
+		this.fechado = fechado;
+	}
+
 	public List<Produto> getProdutos(){
 		return produtos;
 	}

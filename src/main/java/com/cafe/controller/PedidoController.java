@@ -12,73 +12,46 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cafe.model.Pedido;
-import com.cafe.model.Produto;
-import com.cafe.repository.PedidoRepository;
-import com.cafe.repository.ProdutoRepository;
+import com.cafe.service.PedidoService;
 
 @RestController
 @RequestMapping("/api/pedidos")
 public class PedidoController {
 
-	private final PedidoRepository pedidoRepository;
-	private final ProdutoRepository produtoRepository;
+	private final PedidoService pedidoService;
 
-	public PedidoController(PedidoRepository pedidoRepository, ProdutoRepository produtoRepository) {
-		this.pedidoRepository = pedidoRepository;
-		this.produtoRepository = produtoRepository;
+	public PedidoController(PedidoService pedidoService) {
+		this.pedidoService = pedidoService;
 	}
 
-	@PostMapping
-	public Pedido criarPedido() {
-		Pedido pedido = new Pedido();
-		return pedidoRepository.save(pedido);
-	}
+    @PostMapping
+    public Pedido criarPedido() {
+        return pedidoService.criarPedido();
+    }
 
 	@PostMapping("/{pedidoId}/adicionarProduto")
-	public void adicionarProduto(@PathVariable Long pedidoId, @RequestParam Long produtoId,
-			@RequestParam int quantidade) {
-
-		Pedido pedido = pedidoRepository.findById(pedidoId)
-				.orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado."));
-
-		Produto produto = produtoRepository.findById(produtoId)
-				.orElseThrow(() -> new IllegalArgumentException("Produto não encontrado."));
+	public void adicionarProduto(@PathVariable Long pedidoId, @RequestParam Long produtoId, @RequestParam int quantidade) {
+		pedidoService.adicionarProduto(pedidoId, produtoId, quantidade);
 	}
 
 	@PostMapping("/{pedidoId}/retirarProduto")
-	public void retirarProduto(@PathVariable Long pedidoId, @RequestParam Long produtoId,
-			@RequestParam int quantidade) {
-
-		Pedido pedido = pedidoRepository.findById(produtoId)
-				.orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado."));
-
-		Produto produto = produtoRepository.findById(produtoId)
-				.orElseThrow(() -> new IllegalArgumentException("Produto não encontrado."));
+	public void retirarProduto(@PathVariable Long pedidoId, @RequestParam Long produtoId, @RequestParam int quantidade) {
+		pedidoService.retirarProduto(pedidoId, produtoId, quantidade);
 	}
 
 	@GetMapping("/{pedidoId}/calcularPrecoTotal")
 	public BigDecimal calcularPrecoTotal(@PathVariable Long pedidoId) {
-		Pedido pedido = pedidoRepository.findById(pedidoId)
-				.orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado."));
-
-		return BigDecimal.ZERO;
+		return pedidoService.calcularPrecoTotal(pedidoId);
 	}
 
 	@PostMapping("/{pedidoId}/fecharPedido")
 	public void fecharPedido(@PathVariable Long pedidoId, @RequestParam BigDecimal valorPagamento) {
-		Pedido pedido = pedidoRepository.findById(pedidoId)
-				.orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado."));
-        //teste
+		pedidoService.fecharPedido(pedidoId, valorPagamento);
 	}
 
 	@PostMapping("/calcularPrecoTotalPedido")
 	public BigDecimal calcularPrecoTotalPedido(@RequestParam Long pedidoId, @RequestBody Map<Long, Integer> produtos) {
-
-		Pedido pedido = pedidoRepository.findById(pedidoId)
-				.orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado"));
-
-		return BigDecimal.ZERO;
-
+		return pedidoService.calcularPrecoTotalPedido(pedidoId, produtos);
 	}
 
 }
