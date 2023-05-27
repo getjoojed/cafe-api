@@ -13,6 +13,7 @@ import com.cafe.model.Pedido;
 import com.cafe.model.Produto;
 import com.cafe.repository.PedidoRepository;
 import com.cafe.repository.ProdutoRepository;
+import com.cafe.request.FecharPedidoRequest;
 
 @Service
 public class PedidoService {
@@ -30,8 +31,7 @@ public class PedidoService {
 		return pedidoRepository.save(pedido);
 	}
 
-	public void adicionarProduto(@PathVariable Long pedidoId, @RequestParam Long produtoId,
-			@RequestParam int quantidade) {
+	public void adicionarProduto(Long pedidoId, Long produtoId, int quantidade) {
 
 		Pedido pedido = pedidoRepository.findById(pedidoId)
 				.orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado."));
@@ -46,11 +46,15 @@ public class PedidoService {
 		pedidoRepository.save(pedido);
 
 	}
+	
+	public Pedido getPedido(Long pedidoId) {
+	    return pedidoRepository.findById(pedidoId)
+	            .orElse(null);
+	}
 
-	public void retirarProduto(@PathVariable Long pedidoId, @RequestParam Long produtoId,
-			@RequestParam int quantidade) {
+	public void retirarProduto(Long pedidoId, Long produtoId, int quantidade) {
 
-		Pedido pedido = pedidoRepository.findById(produtoId)
+		Pedido pedido = pedidoRepository.findById(pedidoId)
 				.orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado."));
 
 		Produto produto = produtoRepository.findById(produtoId)
@@ -87,39 +91,46 @@ public class PedidoService {
 		return precoTotal;
 	}
 
-	public void fecharPedido(@PathVariable Long pedidoId, @RequestParam BigDecimal valorPagamento) {
-		Pedido pedido = pedidoRepository.findById(pedidoId)
-				.orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado."));
-		
-		BigDecimal precoTotal = calcularPrecoTotal(pedidoId);
-		
-		if(valorPagamento.compareTo(precoTotal) >= 0) {
-			pedido.setFechado(true);
-			pedidoRepository.save(pedido);
-		} else {
-			throw new IllegalArgumentException("Valor de pagamento insuficiente.");
-		}
-		
+	public BigDecimal fecharPedido(Long pedidoId, BigDecimal valorPagamento) {
+	    Pedido pedido = pedidoRepository.findById(pedidoId)
+	            .orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado."));
+	    
+	    BigDecimal precoTotal = calcularPrecoTotal(pedidoId);
+	    
+	    if (valorPagamento != null) {
+	        if (valorPagamento.compareTo(precoTotal) >= 0) {
+	            pedido.setFechado(true);
+	            pedidoRepository.save(pedido);
+	            
+	            // Calcula o troco
+	            BigDecimal troco = valorPagamento.subtract(precoTotal);
+	            return troco;
+	        } else {
+	            throw new IllegalArgumentException("Valor de pagamento insuficiente.");
+	        }
+	    } else {
+	        throw new IllegalArgumentException("O valor do pagamento não pode ser nulo.");
+	    }
 	}
 
-	public BigDecimal calcularPrecoTotalPedido(@RequestParam Long pedidoId, @RequestBody Map<Long, Integer> produtos) {
-		BigDecimal precoTotal = BigDecimal.ZERO;
-		
-		Pedido pedido = pedidoRepository.findById(pedidoId)
-				.orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado."));
+	public BigDecimal calcularPrecoTotalPedido(Long pedidoId, List<Long> produtoIds, List<Integer> quantidades) {
+	    Pedido pedido = pedidoRepository.findById(pedidoId)
+	            .orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado."));
 
-		for(Map.Entry<Long, Integer> entry : produtos.entrySet()) {
-			Long produtoId = entry.getKey();
-			Integer quantidade = entry.getValue();
-			
-			Produto produto = produtoRepository.findById(pedidoId)
-					.orElseThrow(() -> new IllegalArgumentException("Produto não encontrado."));
-					
-			BigDecimal precoProduto = produto.getPreco().multiply(BigDecimal.valueOf(quantidade));
-			precoTotal = precoTotal.add(precoProduto);
-		}
-		
-		return precoTotal;
+	    BigDecimal precoTotal = BigDecimal.ZERO;
+
+	    for (int i = 0; i < produtoIds.size(); i++) {
+	        Long produtoId = produtoIds.get(i);
+	        Integer quantidade = quantidades.get(i);
+
+	        Produto produto = produtoRepository.findById(produtoId)
+	                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado."));
+
+	        BigDecimal precoProduto = produto.getPreco().multiply(BigDecimal.valueOf(quantidade));
+	        precoTotal = precoTotal.add(precoProduto);
+	    }
+
+	    return precoTotal;
 	}
 
 }

@@ -1,8 +1,9 @@
 package com.cafe.controller;
 
 import java.math.BigDecimal;
-import java.util.Map;
+import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cafe.model.Pedido;
+import com.cafe.request.AdicionarProdutoRequest;
+import com.cafe.request.FecharPedidoRequest;
+import com.cafe.request.RetirarProdutoRequest;
 import com.cafe.service.PedidoService;
 
 @RestController
@@ -29,29 +33,40 @@ public class PedidoController {
         return pedidoService.criarPedido();
     }
 
-	@PostMapping("/{pedidoId}/adicionarProduto")
-	public void adicionarProduto(@PathVariable Long pedidoId, @RequestParam Long produtoId, @RequestParam int quantidade) {
-		pedidoService.adicionarProduto(pedidoId, produtoId, quantidade);
-	}
+    @PostMapping("/{pedidoId}/adicionarProduto")
+    public void adicionarProduto(@PathVariable("pedidoId") Long pedidoId, @RequestBody AdicionarProdutoRequest request) {
+        pedidoService.adicionarProduto(pedidoId, request.getProdutoId(), request.getQuantidade());
+    }
 
-	@PostMapping("/{pedidoId}/retirarProduto")
-	public void retirarProduto(@PathVariable Long pedidoId, @RequestParam Long produtoId, @RequestParam int quantidade) {
-		pedidoService.retirarProduto(pedidoId, produtoId, quantidade);
-	}
+    @PostMapping("/{pedidoId}/retirarProduto")
+    public void retirarProduto(@PathVariable Long pedidoId, @RequestBody RetirarProdutoRequest request) {
+        pedidoService.retirarProduto(pedidoId, request.getProdutoId(), request.getQuantidade());
+    }
 
 	@GetMapping("/{pedidoId}/calcularPrecoTotal")
 	public BigDecimal calcularPrecoTotal(@PathVariable Long pedidoId) {
 		return pedidoService.calcularPrecoTotal(pedidoId);
 	}
-
-	@PostMapping("/{pedidoId}/fecharPedido")
-	public void fecharPedido(@PathVariable Long pedidoId, @RequestParam BigDecimal valorPagamento) {
-		pedidoService.fecharPedido(pedidoId, valorPagamento);
+	
+	@GetMapping("/{pedidoId}")
+	public ResponseEntity<Pedido> getPedido(@PathVariable Long pedidoId) {
+	    Pedido pedido = pedidoService.getPedido(pedidoId);
+	    if (pedido != null) {
+	        return ResponseEntity.ok(pedido);
+	    } else {
+	        return ResponseEntity.notFound().build();
+	    }
 	}
 
-	@PostMapping("/calcularPrecoTotalPedido")
-	public BigDecimal calcularPrecoTotalPedido(@RequestParam Long pedidoId, @RequestBody Map<Long, Integer> produtos) {
-		return pedidoService.calcularPrecoTotalPedido(pedidoId, produtos);
+	@PostMapping("/{pedidoId}/fecharPedido")
+	public ResponseEntity<BigDecimal> fecharPedido(@PathVariable Long pedidoId, @RequestBody FecharPedidoRequest request) {
+	    BigDecimal troco = pedidoService.fecharPedido(pedidoId, request.getValorPagamento());
+	    return ResponseEntity.ok(troco);
+	}
+
+	@GetMapping("/{pedidoId}/calcularPrecoTotalPedido")
+	public BigDecimal calcularPrecoTotalPedido(@PathVariable Long pedidoId, @RequestParam List<Long> produtoIds, @RequestParam List<Integer> quantidades) {
+	    return pedidoService.calcularPrecoTotalPedido(pedidoId, produtoIds, quantidades);
 	}
 
 }
