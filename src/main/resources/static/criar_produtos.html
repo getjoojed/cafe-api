@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8" />
+	<title>Criar Produtos</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+		}
+
+		.container {
+			max-width: 400px;
+			margin: 0 auto;
+			padding: 20px;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+
+
+		}
+
+		.form-group {
+			margin-bottom: 20px;
+		}
+
+		.form-group label {
+			display: block;
+			margin-bottom: 5px;
+		}
+
+		.form-group input {
+			width: 94%;
+			padding: 10px;
+			font-size: 16px;
+			border: 1px solid #ccc;
+			border-radius: 4px;
+		}
+
+		.form-group button {
+			padding: 10px 29.5px;
+			font-size: 16px;
+			background-color: #4CAF50;
+			color: #fff;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+		}
+
+		.form-group button:hover {
+			background-color: #45a049;
+		}
+
+		.message {
+			margin-top: 20px;
+			padding: 10px;
+			border-radius: 4px;
+		}
+
+		.success {
+			background-color: #DFF2BF;
+			border: 1px solid #4F8A10;
+			color: #4F8A10;
+		}
+
+		.error {
+			background-color: #FFBABA;
+			border: 1px solid #D8000C;
+			color: #D8000C;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<h1>Criar Produtos</h1>
+		<div class="form-group">
+			<label for="produtoId">ID do Produto:</label>
+			<input type="number" id="produtoId" required>
+		</div>
+		<div class="form-group">
+			<label for="produtoNome">Nome do Produto:</label>
+			<input type="text" id="produtoNome" required>
+		</div>
+		<div class="form-group">
+			<label for="produtoPreco">Preço do Produto:</label>
+			<input type="number" step="0.01" id="produtoPreco" required>
+		</div>
+		<div class="form-group">
+			<button onclick="adicionarProduto()">Adicionar Produto</button>
+			<button onclick="exibirProdutoPorId()">Exibir Produto por ID</button>
+		</div>
+		<div id="message" class="message" style="display: none;"></div>
+	</div>
+
+	<script>
+		function adicionarProduto() {
+			var produtoId = document.getElementById('produtoId').value;
+			var produtoNome = document.getElementById('produtoNome').value;
+			var produtoPreco = document.getElementById('produtoPreco').value;
+
+			// Verifica se os campos foram preenchidos
+			if (!produtoId || !produtoNome || !produtoPreco) {
+				showMessage('Por favor, preencha todos os campos.', 'error');
+				return;
+			}
+
+			// Monta o objeto de requisição para adicionar o produto
+			var request = {
+				id: parseInt(produtoId),
+				nome: produtoNome,
+				preco: parseFloat(produtoPreco)
+			};
+
+			// Envia a requisição para adicionar o produto
+			fetch('/api/produtos', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(request)
+			})
+				.then(function (response) {
+					if (response.ok) {
+						showMessage('Produto adicionado com sucesso!', 'success');
+						document.getElementById('produtoId').value = '';
+						document.getElementById('produtoNome').value = '';
+						document.getElementById('produtoPreco').value = '';
+					} else {
+						throw new Error('Erro ao adicionar o produto. Por favor, tente novamente.');
+					}
+				})
+				.catch(function (error) {
+					showMessage(error.message, 'error');
+				});
+		}
+
+		function showMessage(message, type) {
+			var messageElement = document.getElementById('message');
+			messageElement.innerText = message;
+			messageElement.className = 'message ' + type;
+			messageElement.style.display = 'block';
+		}
+
+		function exibirProdutoPorId() {
+			var produtoId = document.getElementById('produtoId').value;
+
+			// Verifica se o campo do ID do produto foi preenchido
+			if (!produtoId) {
+				showMessage('Por favor, informe o ID do produto.', 'error');
+				return;
+			}
+
+			// Faz a requisição para obter as informações do produto pelo ID
+			fetch('/api/produtos/' + produtoId)
+				.then(function (response) {
+					if (response.ok) {
+						return response.json();
+					} else {
+						throw new Error('Produto não encontrado. Verifique o ID do produto e tente novamente.');
+					}
+				})
+				.then(function (data) {
+					// Exibe as informações do produto na tela
+					showMessage('Informações do Produto:\n\nID: ' + data.id + '\nNome: ' + data.nome + '\nPreço: ' + data.preco, 'success');
+				})
+				.catch(function (error) {
+					showMessage(error.message, 'error');
+				});
+		}
+
+
+	</script>
+</body>
+
+</html>

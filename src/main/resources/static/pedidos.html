@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Tela de Pedidos</title>
+    <style>
+        .resultado {
+            margin-top: 20px;
+            white-space: pre-wrap;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tela de Pedidos</h1>
+    <h2>Criar Pedido</h2>
+<button onclick="criarPedido()">Criar Pedido</button>
+
+<h2>Visualizar Pedido</h2>
+<label for="pedidoId">ID do Pedido:</label>
+<input type="text" id="pedidoId">
+<button onclick="visualizarPedido()">Visualizar Pedido</button>
+
+<div id="resultado"></div>
+
+<script>
+    function criarPedido() {
+        fetch('/api/pedidos', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({})
+        })
+        .then(function (response) {
+            if (!response.ok) {
+                throw new Error('Erro ao criar o pedido.');
+            }
+            return response.json();
+        })
+        .then(function (data) {
+            showSuccess('Pedido criado com sucesso. ID do Pedido: ' + data.id);
+        })
+        .catch(function (error) {
+            showError(error.message);
+        });
+    }
+
+    function visualizarPedido() {
+        var pedidoId = document.getElementById('pedidoId').value;
+
+        fetch('/api/pedidos/' + pedidoId)
+        .then(function (response) {
+            if (!response.ok) {
+                throw new Error('Erro ao obter as informações do pedido.');
+            }
+            return response.json();
+        })
+        .then(function (data) {
+            var resultadoDiv = document.getElementById('resultado');
+            resultadoDiv.innerHTML = '';
+
+            var pre = document.createElement('pre');
+            pre.classList.add('resultado');
+            pre.textContent = JSON.stringify(data, null, 2);
+            resultadoDiv.appendChild(pre);
+        })
+        .catch(function (error) {
+            showError(error.message);
+        });
+    }
+
+    function showSuccess(message) {
+        var resultadoDiv = document.getElementById('resultado');
+        resultadoDiv.innerHTML = '';
+
+        var successDiv = document.createElement('div');
+        successDiv.classList.add('resultado', 'success');
+        successDiv.textContent = message;
+        resultadoDiv.appendChild(successDiv);
+    }
+
+    function showError(message) {
+        var resultadoDiv = document.getElementById('resultado');
+        resultadoDiv.innerHTML = '';
+
+        var errorDiv = document.createElement('div');
+        errorDiv.classList.add('resultado', 'error');
+        errorDiv.textContent = message;
+        resultadoDiv.appendChild(errorDiv);
+    }
+</script>
+</body>
+</html>

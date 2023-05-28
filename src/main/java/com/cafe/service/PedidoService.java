@@ -31,20 +31,18 @@ public class PedidoService {
 		return pedidoRepository.save(pedido);
 	}
 
-	public void adicionarProduto(Long pedidoId, Long produtoId, int quantidade) {
+	public void adicionarProduto(Pedido pedido, Long produtoId, int quantidade) {
+	    Pedido pedidoEncontrado = pedidoRepository.findById(pedido.getId())
+	        .orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado."));
 
-		Pedido pedido = pedidoRepository.findById(pedidoId)
-				.orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado."));
+	    Produto produto = produtoRepository.findById(produtoId)
+	        .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado."));
 
-		Produto produto = produtoRepository.findById(produtoId)
-				.orElseThrow(() -> new IllegalArgumentException("Produto não encontrado."));
+	    for (int i = 0; i < quantidade; i++) {
+	        pedidoEncontrado.getProdutos().add(produto);
+	    }
 
-		for (int i = 0; i < quantidade; i++) {
-			pedido.getProdutos().add(produto);
-		}
-
-		pedidoRepository.save(pedido);
-
+	    pedidoRepository.save(pedidoEncontrado);
 	}
 	
 	public Pedido getPedido(Long pedidoId) {

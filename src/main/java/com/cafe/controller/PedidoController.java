@@ -33,11 +33,25 @@ public class PedidoController {
         return pedidoService.criarPedido();
     }
 
-    @PostMapping("/{pedidoId}/adicionarProduto")
-    public void adicionarProduto(@PathVariable("pedidoId") Long pedidoId, @RequestBody AdicionarProdutoRequest request) {
-        pedidoService.adicionarProduto(pedidoId, request.getProdutoId(), request.getQuantidade());
-    }
+//    @PostMapping("/{pedidoId}/adicionarProduto")
+//    public void adicionarProduto(@PathVariable("pedidoId") Long pedidoId, @RequestBody AdicionarProdutoRequest request) {
+//        pedidoService.adicionarProduto(pedidoId, request.getProdutoId(), request.getQuantidade());
+//    }
 
+    @PostMapping("/{pedidoId}/adicionarProduto")
+    public ResponseEntity<Pedido> adicionarProduto(@PathVariable Long pedidoId, @RequestBody AdicionarProdutoRequest request) {
+        try {
+            Pedido pedido = pedidoService.getPedido(pedidoId);
+            if (pedido == null) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            pedidoService.adicionarProduto(pedido, request.getProdutoId(), request.getQuantidade());
+            return ResponseEntity.ok(pedido);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }}
+    
     @PostMapping("/{pedidoId}/retirarProduto")
     public void retirarProduto(@PathVariable Long pedidoId, @RequestBody RetirarProdutoRequest request) {
         pedidoService.retirarProduto(pedidoId, request.getProdutoId(), request.getQuantidade());
