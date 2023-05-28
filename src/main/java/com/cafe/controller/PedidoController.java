@@ -53,14 +53,16 @@ public class PedidoController {
         }}
     
     @PostMapping("/{pedidoId}/retirarProduto")
-    public void retirarProduto(@PathVariable Long pedidoId, @RequestBody RetirarProdutoRequest request) {
+    public ResponseEntity<Void> retirarProduto(@PathVariable Long pedidoId, @RequestBody RetirarProdutoRequest request) {
         pedidoService.retirarProduto(pedidoId, request.getProdutoId(), request.getQuantidade());
+        return ResponseEntity.noContent().build();
     }
 
-	@GetMapping("/{pedidoId}/calcularPrecoTotal")
-	public BigDecimal calcularPrecoTotal(@PathVariable Long pedidoId) {
-		return pedidoService.calcularPrecoTotal(pedidoId);
-	}
+    @GetMapping("/{pedidoId}/calcularPrecoTotal")
+    public ResponseEntity<String> calcularPrecoTotal(@PathVariable Long pedidoId) {
+        BigDecimal precoTotal = pedidoService.calcularPrecoTotal(pedidoId);
+        return ResponseEntity.ok(precoTotal.toString());
+    }
 	
 	@GetMapping("/{pedidoId}")
 	public ResponseEntity<Pedido> getPedido(@PathVariable Long pedidoId) {
@@ -75,7 +77,12 @@ public class PedidoController {
 	@PostMapping("/{pedidoId}/fecharPedido")
 	public ResponseEntity<BigDecimal> fecharPedido(@PathVariable Long pedidoId, @RequestBody FecharPedidoRequest request) {
 	    BigDecimal troco = pedidoService.fecharPedido(pedidoId, request.getValorPagamento());
-	    return ResponseEntity.ok(troco);
+	    
+	    if (troco != null) {
+	        return ResponseEntity.ok(troco);
+	    } else {
+	        throw new IllegalArgumentException("Ocorreu um erro ao fechar o pedido. Por favor, tente novamente.");
+	    }
 	}
 
 	@GetMapping("/{pedidoId}/calcularPrecoTotalPedido")

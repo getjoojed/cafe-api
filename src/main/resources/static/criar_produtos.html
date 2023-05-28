@@ -71,6 +71,7 @@
 </head>
 
 <body>
+	<button onclick="redirectToMenu()">Voltar</button>
 	<div class="container">
 		<h1>Criar Produtos</h1>
 		<div class="form-group">
@@ -132,6 +133,10 @@
 				.catch(function (error) {
 					showMessage(error.message, 'error');
 				});
+		}
+
+		function redirectToMenu() {
+			window.location.href = 'index.html';
 		}
 
 		function showMessage(message, type) {

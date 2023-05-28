@@ -64,16 +64,23 @@
 			<input type="number" id="quantidade" min="1">
 		</div>
 		<div class="form-group">
+			<label for="valorPagamento">Valor do Pagamento:</label>
+			<input type="number" id="valorPagamento" min="0" step="0.01">
+		</div>
+
+		<div class="form-group">
 			<button onclick="adicionarProduto()">Adicionar Produto</button>
 			<button onclick="retirarProduto()">Retirar Produto</button>
 			<button onclick="calcularPrecoTotal()">Calcular Preço Total</button>
 			<button onclick="fecharPedido()">Fechar Pedido</button>
 			<button onclick="redirectToAdicionarProdutos()">Criar Produtos</button>
 		</div>
+		<button onclick="redirectToPedidos()">Gerenciador de pedidos</button>
 		<div id="result" class="result"></div>
 	</div>
 
-	<script src="script.js">
+	<script>
+		// Função para adicionar um produto ao pedido
 		function adicionarProduto() {
 			var produtoId = document.getElementById('produtoId').value;
 			var quantidade = document.getElementById('quantidade').value;
@@ -118,7 +125,10 @@
 			window.location.href = 'criar_produtos.html';
 		}
 
-		// Função para retirar um produto do pedido
+		function redirectToPedidos() {
+			window.location.href = 'pedidos.html';
+		}
+
 		function retirarProduto() {
 			var pedidoId = document.getElementById('pedidoId').value;
 			var produtoId = document.getElementById('produtoId').value;
@@ -149,45 +159,44 @@
 					if (!response.ok) {
 						throw new Error('Erro ao retirar o produto do pedido.');
 					}
-					return response.json();
+					if (response.status === 204) {
+						// Resposta vazia, produto removido com sucesso
+						showSuccess('Produto retirado do pedido com sucesso.');
+					} else {
+						return response.json();
+					}
 				})
 				.then(function (data) {
-					showSuccess('Produto retirado do pedido com sucesso.');
+					if (data && data.status === 'error') {
+						showError('Ocorreu um erro ao retirar o produto do pedido. Por favor, tente novamente.');
+					}
 				})
 				.catch(function (error) {
 					showError(error.message);
 				});
 		}
 
-		// Função para calcular o preço total do pedido
+
 		function calcularPrecoTotal() {
 			var pedidoId = document.getElementById('pedidoId').value;
 
-			// Verifica se o campo foi preenchido
-			if (!pedidoId) {
-				showError('Por favor, preencha o campo ID do Pedido.');
-				return;
-			}
-
-			// Envia a requisição para a API
-			fetch('/api/pedidos/' + pedidoId + '/calcularPrecoTotal', {
-				method: 'GET'
-			})
+			fetch('/api/pedidos/' + pedidoId + '/calcularPrecoTotal')
 				.then(function (response) {
 					if (!response.ok) {
-						throw new Error('Erro ao calcular o preço total do pedido.');
+						throw new Error('Erro ao obter as informações do pedido.');
 					}
-					return response.json();
+					return response.text();
 				})
-				.then(function (data) {
-					showSuccess('Preço total do pedido: R$ ' + data.precoTotal.toFixed(2));
+				.then(function (precoTotal) {
+					var resultadoDiv = document.getElementById('result');
+					resultadoDiv.innerHTML = 'Preço Total do Pedido: R$ ' + parseFloat(precoTotal).toFixed(2);
 				})
 				.catch(function (error) {
 					showError(error.message);
 				});
 		}
 
-		// Função para fechar o pedido
+
 		function fecharPedido() {
 			var pedidoId = document.getElementById('pedidoId').value;
 			var valorPagamento = document.getElementById('valorPagamento').value;
@@ -214,17 +223,23 @@
 			})
 				.then(function (response) {
 					if (!response.ok) {
-						throw new Error('Erro ao fechar o pedido.');
+						throw new Error('Erro ao  fechar pedido. Valor insuficiente ou o pedido já está fechado.');
 					}
-					return response.json();
+					return response.text();
 				})
-				.then(function (data) {
-					showSuccess('Pedido fechado com sucesso. Troco: R$ ' + data.troco.toFixed(2));
+				.then(function (troco) {
+					if (troco !== undefined) {
+						showSuccess('Pedido fechado com sucesso. Troco: R$ ' + parseFloat(troco).toFixed(2));
+					} else {
+						showError('Ocorreu um erro ao fechar o pedido. Por favor, tente novamente.');
+					}
 				})
 				.catch(function (error) {
 					showError(error.message);
 				});
 		}
+
+
 
 		// Função para exibir uma mensagem de sucesso
 		function showSuccess(message) {

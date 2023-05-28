@@ -75,23 +75,29 @@ public class PedidoService {
 		pedidoRepository.save(pedido);
 	}
 
-	public BigDecimal calcularPrecoTotal(@PathVariable Long pedidoId) {
-		Pedido pedido = pedidoRepository.findById(pedidoId)
-				.orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado."));
+	public BigDecimal calcularPrecoTotal(Long pedidoId) {
+	    Pedido pedido = pedidoRepository.findById(pedidoId)
+	            .orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado."));
 
-		BigDecimal precoTotal = BigDecimal.ZERO;
-		List<Produto> produtos = pedido.getProdutos();
+	    BigDecimal precoTotal = BigDecimal.ZERO;
+	    List<Produto> produtos = pedido.getProdutos();
 
-		for (Produto produto : produtos) {
-			precoTotal = precoTotal.add(produto.getPreco());
-		}
+	    for (Produto produto : produtos) {
+	        if (produto.getPreco() != null) {
+	            precoTotal = precoTotal.add(produto.getPreco());
+	        }
+	    }
 
-		return precoTotal;
+	    return precoTotal;
 	}
 
 	public BigDecimal fecharPedido(Long pedidoId, BigDecimal valorPagamento) {
 	    Pedido pedido = pedidoRepository.findById(pedidoId)
 	            .orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado."));
+	    
+	    if (pedido.isFechado()) {
+	        throw new IllegalArgumentException("O pedido já está fechado.");
+	    }
 	    
 	    BigDecimal precoTotal = calcularPrecoTotal(pedidoId);
 	    
@@ -100,7 +106,6 @@ public class PedidoService {
 	            pedido.setFechado(true);
 	            pedidoRepository.save(pedido);
 	            
-	            // Calcula o troco
 	            BigDecimal troco = valorPagamento.subtract(precoTotal);
 	            return troco;
 	        } else {

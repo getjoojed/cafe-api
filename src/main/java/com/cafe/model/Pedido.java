@@ -1,7 +1,10 @@
 package com.cafe.model;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -19,6 +22,17 @@ public class Pedido {
 	private List<Produto> produtos = new ArrayList<>();
 	
 	private boolean fechado = false;
+
+	@JsonIgnore
+	private BigDecimal precoTotal;
+	
+	public BigDecimal getPrecoTotal() {
+		return precoTotal;
+	}
+
+	public void setPrecoTotal(BigDecimal precoTotal) {
+		this.precoTotal = precoTotal;
+	}
 
 	public Long getId() {
 		return id;

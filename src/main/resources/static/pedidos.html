@@ -17,6 +17,7 @@
     </style>
 </head>
 <body>
+	<button onclick="redirectToMenu()">Voltar</button>
     <h1>Tela de Pedidos</h1>
     <h2>Criar Pedido</h2>
 <button onclick="criarPedido()">Criar Pedido</button>
@@ -94,6 +95,9 @@
         errorDiv.textContent = message;
         resultadoDiv.appendChild(errorDiv);
     }
+    function redirectToMenu() {
+	window.location.href = 'index.html';
+}
 </script>
 </body>
 </html>
