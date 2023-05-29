@@ -187,7 +187,7 @@
 
 					data.forEach(function (produto) {
 						var produtoElement = document.createElement('p');
-						produtoElement.textContent = 'Nome: ' + produto.nome + ', Preço: R$ ' + produto.preco.toFixed(2);
+						produtoElement.textContent = 'ID: ' + produto.id + ', Nome: ' + produto.nome + ', Preço: R$ ' + produto.preco.toFixed(2);
 						produtosContainer.appendChild(produtoElement);
 					});
 				})
