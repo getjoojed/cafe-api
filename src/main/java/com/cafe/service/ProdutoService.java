@@ -1,10 +1,12 @@
 package com.cafe.service;
 
-import com.cafe.model.Produto;
-import com.cafe.repository.ProdutoRepository;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import com.cafe.model.Produto;
+import com.cafe.repository.ProdutoRepository;
 
 @Service
 public class ProdutoService {
@@ -22,4 +24,9 @@ public class ProdutoService {
     public Produto criarProduto(Produto produto) {
         return produtoRepository.save(produto);
     }
+    
+    public List<Produto> listarProdutos() {
+        return produtoRepository.findAll();
+    }
+    
 }

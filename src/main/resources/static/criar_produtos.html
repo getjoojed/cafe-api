@@ -37,13 +37,14 @@
 		}
 
 		.form-group button {
-			padding: 10px 29.5px;
+			padding: 10px 28px;
 			font-size: 16px;
 			background-color: #4CAF50;
 			color: #fff;
 			border: none;
 			border-radius: 4px;
 			cursor: pointer;
+			margin-bottom: 5px;
 		}
 
 		.form-group button:hover {
@@ -89,8 +90,10 @@
 		<div class="form-group">
 			<button onclick="adicionarProduto()">Adicionar Produto</button>
 			<button onclick="exibirProdutoPorId()">Exibir Produto por ID</button>
+			<button onclick="listarProdutos()">Listar Produtos</button>
 		</div>
 		<div id="message" class="message" style="display: none;"></div>
+			<div id="produtosContainer"></div>
 	</div>
 
 	<script>
@@ -99,20 +102,17 @@
 			var produtoNome = document.getElementById('produtoNome').value;
 			var produtoPreco = document.getElementById('produtoPreco').value;
 
-			// Verifica se os campos foram preenchidos
 			if (!produtoId || !produtoNome || !produtoPreco) {
 				showMessage('Por favor, preencha todos os campos.', 'error');
 				return;
 			}
 
-			// Monta o objeto de requisição para adicionar o produto
 			var request = {
 				id: parseInt(produtoId),
 				nome: produtoNome,
 				preco: parseFloat(produtoPreco)
 			};
 
-			// Envia a requisição para adicionar o produto
 			fetch('/api/produtos', {
 				method: 'POST',
 				headers: {
@@ -149,13 +149,11 @@
 		function exibirProdutoPorId() {
 			var produtoId = document.getElementById('produtoId').value;
 
-			// Verifica se o campo do ID do produto foi preenchido
 			if (!produtoId) {
 				showMessage('Por favor, informe o ID do produto.', 'error');
 				return;
 			}
 
-			// Faz a requisição para obter as informações do produto pelo ID
 			fetch('/api/produtos/' + produtoId)
 				.then(function (response) {
 					if (response.ok) {
@@ -165,11 +163,39 @@
 					}
 				})
 				.then(function (data) {
-					// Exibe as informações do produto na tela
+
 					showMessage('Informações do Produto:\n\nID: ' + data.id + '\nNome: ' + data.nome + '\nPreço: ' + data.preco, 'success');
 				})
 				.catch(function (error) {
 					showMessage(error.message, 'error');
+				});
+		}
+
+		document.getElementById('btnMostrarProdutosDisponiveis').addEventListener('click', function () {
+			mostrarProdutosDisponiveis();
+		});
+
+		function listarProdutos() {
+			fetch('/api/produtos')
+				.then(function (response) {
+					if (!response.ok) {
+						throw new Error('Erro ao listar produtos.');
+					}
+					return response.json();
+				})
+				.then(function (data) {
+					var produtosContainer = document.getElementById('produtosContainer');
+					produtosContainer.innerHTML = '';
+
+					data.forEach(function (produto) {
+						var produtoElement = document.createElement('p');
+						produtoElement.textContent = 'Nome: ' + produto.nome + ', Preço: R$ ' + produto.preco.toFixed(2);
+						produtosContainer.appendChild(produtoElement);
+					});
+				})
+				.catch(function (error) {
+					console.error(error);
+					showError('Ocorreu um erro ao listar os produtos. Por favor, tente novamente.');
 				});
 		}
 
