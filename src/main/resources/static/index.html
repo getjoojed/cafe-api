@@ -80,26 +80,22 @@
 	</div>
 
 	<script>
-		// Função para adicionar um produto ao pedido
 		function adicionarProduto() {
 			var produtoId = document.getElementById('produtoId').value;
 			var quantidade = document.getElementById('quantidade').value;
 			var pedidoId = document.getElementById('pedidoId').value;
 
-			// Verifica se os campos foram preenchidos
 			if (!produtoId || !quantidade) {
 				showError('Por favor, preencha todos os campos.');
 				return;
 			}
 
-			// Monta o objeto de requisição para adicionar o produto ao pedido
 			var request = {
 				pedidoId: pedidoId,
 				produtoId: parseInt(produtoId),
 				quantidade: parseInt(quantidade)
 			};
 
-			// Envia a requisição para adicionar o produto ao pedido
 			fetch('/api/pedidos/' + pedidoId + '/adicionarProduto', {
 				method: 'POST',
 				headers: {
@@ -134,20 +130,17 @@
 			var produtoId = document.getElementById('produtoId').value;
 			var quantidade = document.getElementById('quantidade').value;
 
-			// Verifica se os campos foram preenchidos
 			if (!pedidoId || !produtoId || !quantidade) {
 				showError('Por favor, preencha todos os campos.');
 				return;
 			}
 
-			// Monta o objeto de requisição
 			var request = {
 				pedidoId: parseInt(pedidoId),
 				produtoId: parseInt(produtoId),
 				quantidade: parseInt(quantidade)
 			};
 
-			// Envia a requisição para a API
 			fetch('/api/pedidos/' + pedidoId + '/retirarProduto', {
 				method: 'POST',
 				headers: {
@@ -160,7 +153,6 @@
 						throw new Error('Erro ao retirar o produto do pedido.');
 					}
 					if (response.status === 204) {
-						// Resposta vazia, produto removido com sucesso
 						showSuccess('Produto retirado do pedido com sucesso.');
 					} else {
 						return response.json();
@@ -201,19 +193,16 @@
 			var pedidoId = document.getElementById('pedidoId').value;
 			var valorPagamento = document.getElementById('valorPagamento').value;
 
-			// Verifica se os campos foram preenchidos
 			if (!pedidoId || !valorPagamento) {
 				showError('Por favor, preencha todos os campos.');
 				return;
 			}
 
-			// Monta o objeto de requisição
 			var request = {
 				pedidoId: parseInt(pedidoId),
 				valorPagamento: parseFloat(valorPagamento)
 			};
 
-			// Envia a requisição para a API
 			fetch('/api/pedidos/' + pedidoId + '/fecharPedido', {
 				method: 'POST',
 				headers: {
@@ -239,16 +228,12 @@
 				});
 		}
 
-
-
-		// Função para exibir uma mensagem de sucesso
 		function showSuccess(message) {
 			var resultDiv = document.getElementById('result');
 			resultDiv.style.color = 'green';
 			resultDiv.textContent = message;
 		}
 
-		// Função para exibir uma mensagem de erro
 		function showError(message) {
 			var resultDiv = document.getElementById('result');
 			resultDiv.style.color = 'red';
